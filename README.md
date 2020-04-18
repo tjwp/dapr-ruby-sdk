@@ -1,15 +1,18 @@
-# Dapr
+# Dapr SDK for Ruby
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/dapr`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is the Dapr SDK for Ruby, based on the auto-generated proto client.<br>
 
-TODO: Delete this and the text above, and describe your gem
+For more info on Dapr and gRPC, visit [this link](https://github.com/dapr/docs/tree/master/howto/create-grpc-app).
+
+The repository generates the following package
+- dapr-client
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'dapr'
+gem 'dapr-client'
 ```
 
 And then execute:
@@ -18,11 +21,27 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install dapr
+    $ gem install dapr-client
 
-## Usage
+## Example Code
 
-TODO: Write usage instructions here
+A client can be created as follows:
+
+```ruby
+require "dapr/generated/dapr_services_pb"
+
+client = Dapr::Dapr::Stub.new('localhost:5001', :this_channel_is_insecure)
+```
+
+You can find a complete example [here](https://github.com/tjwp/dapr-ruby-sdk/blob/master/example.rb)
+
+### Running the code locally
+
+You can execute this code using the local dapr runtime:
+
+```sh
+dapr run --protocol grpc --grpc-port=50001 ruby example.rb
+```
 
 ## Development
 

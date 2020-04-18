@@ -9,6 +9,12 @@ GEM
   specs:
     diff-lcs (1.3)
     google-protobuf (3.11.4)
+    googleapis-common-protos-types (1.0.4)
+      google-protobuf (~> 3.0)
+    grpc (1.27.0)
+      google-protobuf (~> 3.11)
+      googleapis-common-protos-types (~> 1.0)
+    grpc-tools (1.28.0)
     rake (10.5.0)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
@@ -30,6 +36,8 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.17)
   dapr!
+  grpc
+  grpc-tools
   rake (~> 10.0)
   rspec (~> 3.0)
 

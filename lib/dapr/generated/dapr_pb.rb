@@ -76,17 +76,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :value, :message, 2, "google.protobuf.Any"
       optional :etag, :string, 3
       map :metadata, :string, :string, 4
-      optional :options, :message, 5, "dapr.StateRequestOptions"
-    end
-    add_message "dapr.StateRequestOptions" do
-      optional :concurrency, :string, 1
-      optional :consistency, :string, 2
-      optional :retryPolicy, :message, 3, "dapr.StateRetryPolicy"
-    end
-    add_message "dapr.StateRetryPolicy" do
-      optional :threshold, :int32, 1
-      optional :pattern, :string, 2
-      optional :interval, :message, 3, "google.protobuf.Duration"
+      optional :options, :message, 5, "dapr.StateOptions"
     end
   end
 end
@@ -106,6 +96,4 @@ module Dapr
   StateOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.StateOptions").msgclass
   RetryPolicy = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.RetryPolicy").msgclass
   StateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.StateRequest").msgclass
-  StateRequestOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.StateRequestOptions").msgclass
-  StateRetryPolicy = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.StateRetryPolicy").msgclass
 end
