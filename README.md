@@ -28,7 +28,7 @@ Or install it yourself as:
 A client can be created as follows:
 
 ```ruby
-require "dapr/generated/dapr_services_pb"
+require "dapr_services_pb"
 
 client = Dapr::Dapr::Stub.new('localhost:5001', :this_channel_is_insecure)
 ```

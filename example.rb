@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "dapr/generated/dapr_services_pb"
+require "dapr_services_pb"
 
 port = ENV.fetch('DAPR_GRPC_PORT', '5001')
 dapr_uri = "localhost:#{port}"
