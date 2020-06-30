@@ -1,10 +1,12 @@
-require_relative "./dapr_client_impl"
+require_relative "./app_callback_service"
 
-port = '0.0.0.0:50002'
+$stdout.sync = true
+
+port = '0.0.0.0:50051'
 s = GRPC::RpcServer.new
 s.add_http2_port(port, :this_port_is_insecure)
 GRPC.logger.info("... running insecurely on #{port}")
-service = Dapr::DaprClientImpl
+service = AppCallbackService
 s.handle(service)
 
 # Runs the server with SIGHUP, SIGINT and SIGQUIT signal handlers to

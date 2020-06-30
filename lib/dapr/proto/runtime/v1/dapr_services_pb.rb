@@ -25,7 +25,8 @@ module Dapr
             self.service_name = 'dapr.proto.runtime.v1.Dapr'
 
             # Invokes a method on a remote Dapr app.
-            rpc :InvokeService, InvokeServiceRequest, Dapr::Proto::Common::V1::InvokeResponse
+            # Nested Dapr modules are problematic so this must be prefixed as a top-level constant
+            rpc :InvokeService, InvokeServiceRequest, ::Dapr::Proto::Common::V1::InvokeResponse
             # Gets the state for a specific key.
             rpc :GetState, GetStateRequest, GetStateResponse
             # Saves the state for a specific key.
