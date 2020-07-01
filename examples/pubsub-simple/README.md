@@ -11,3 +11,11 @@ dapr run --app-id subscriber --protocol grpc --app-port 50051 bundle exec ruby s
 # 2. Start Publisher
 dapr run --app-id publisher --protocol grpc bundle exec ruby publisher.rb
 ```
+
+### Ruby client
+
+Alternatively to publish using the ruby client
+
+```bash
+dapr run --app-id publisher-ruby --protocol grpc bundle exec ruby publisher-ruby.rb
+```

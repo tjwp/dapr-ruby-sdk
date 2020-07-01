@@ -15,3 +15,11 @@ dapr run --app-id invoke-receiver --protocol grpc --app-port 50051 bundle exec r
 # 2. Start Caller
 dapr run --app-id invoke-caller --protocol grpc bundle exec ruby invoke-caller.rb
 ```
+
+### Ruby client
+
+To run the caller using the Ruby implementation:
+
+```bash
+dapr run --app-id invoke-caller-ruby --protocol grpc bundle exec ruby invoke-caller-ruby.rb
+```
