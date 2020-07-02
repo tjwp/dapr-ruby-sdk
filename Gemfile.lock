@@ -2,19 +2,24 @@ PATH
   remote: .
   specs:
     dapr-client (0.2.0)
+      faraday
       google-protobuf
+      grpc
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.3)
-    google-protobuf (3.11.4)
-    googleapis-common-protos-types (1.0.4)
-      google-protobuf (~> 3.0)
-    grpc (1.27.0)
+    faraday (1.0.1)
+      multipart-post (>= 1.2, < 3)
+    google-protobuf (3.12.2-universal-darwin)
+    googleapis-common-protos-types (1.0.5)
+      google-protobuf (~> 3.11)
+    grpc (1.28.0-universal-darwin)
       google-protobuf (~> 3.11)
       googleapis-common-protos-types (~> 1.0)
     grpc-tools (1.28.0)
+    multipart-post (2.1.1)
     rake (13.0.1)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
@@ -36,7 +41,6 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.17)
   dapr-client!
-  grpc
   grpc-tools
   rake (>= 12.3.3)
   rspec (~> 3.0)
