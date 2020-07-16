@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "dapr/proto/runtime/v1/dapr_services_pb"
+require "dapr/client/state_store"
 
 module Dapr
   module Client
@@ -11,36 +12,6 @@ module Dapr
       EMPTY_HASH= Hash.new.freeze
 
       JSON_CONTENT_TYPE = "application/json"
-
-      class StateStore
-        attr_reader :name, :client
-
-        def initialize(name:, client:)
-          @name = name
-          @client = client
-        end
-
-        def [](key)
-          value, _etag = client.get_state(store_name: name, key: key)
-          value
-        end
-
-        def []=(key, value)
-          # TODO: support save item?
-          client.save_state(store_name: name, key: key, value: value)
-          value
-        end
-
-        def delete(key)
-          client.delete_state(store_name: name, key: key)
-          nil
-        end
-
-        def merge(data)
-          client.save_states(store_name: name, data: data)
-          nil
-        end
-      end
 
       def initialize(port: nil)
         port ||= "localhost:#{ENV['DAPR_GRPC_PORT']}"
@@ -132,11 +103,11 @@ module Dapr
             metadata: metadata
           }
         ))
+        # TODO: parse data as JSON?
         response.data
       end
 
-      def invoke_binding(name:, data:, metadata: EMPTY_HASH, operation: "create")
-        # TODO: convert data to JSON?
+      def invoke_binding(name:, data:, metadata: EMPTY_HASH, operation: 'create')
         response = stub.invoke_binding(RuntimeV1::InvokeBindingRequest.new(
           {
             name: name,
