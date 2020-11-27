@@ -7,6 +7,7 @@ syntax = "proto3";
 
 package dapr.proto.runtime.v1;
 
+import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "dapr/proto/common/v1/common.proto";
 
@@ -23,11 +24,17 @@ service Dapr {
   // Gets the state for a specific key.
   rpc GetState(GetStateRequest) returns (GetStateResponse) {}
 
+  // Gets a bulk of state items for a list of keys
+  rpc GetBulkState(GetBulkStateRequest) returns (GetBulkStateResponse) {}
+
   // Saves the state for a specific key.
   rpc SaveState(SaveStateRequest) returns (google.protobuf.Empty) {}
 
   // Deletes the state for a specific key.
   rpc DeleteState(DeleteStateRequest) returns (google.protobuf.Empty) {}
+  
+  // Executes transactions for a specified store
+  rpc ExecuteStateTransaction(ExecuteStateTransactionRequest) returns (google.protobuf.Empty) {}
 
   // Publishes events to the specific topic.
   rpc PublishEvent(PublishEventRequest) returns (google.protobuf.Empty) {}
@@ -37,6 +44,27 @@ service Dapr {
 
   // Gets secrets from secret stores.
   rpc GetSecret(GetSecretRequest) returns (GetSecretResponse) {}
+
+  // Register an actor timer.
+  rpc RegisterActorTimer(RegisterActorTimerRequest) returns (google.protobuf.Empty) {}
+
+  // Unregister an actor timer.
+  rpc UnregisterActorTimer(UnregisterActorTimerRequest) returns (google.protobuf.Empty) {}
+
+  // Register an actor reminder.
+  rpc RegisterActorReminder(RegisterActorReminderRequest) returns (google.protobuf.Empty) {}
+
+  // Unregister an actor reminder.
+  rpc UnregisterActorReminder(UnregisterActorReminderRequest) returns (google.protobuf.Empty) {}
+
+  // Gets the state for a specific actor.
+  rpc GetActorState(GetActorStateRequest) returns (GetActorStateResponse) {}
+
+  // Executes state transactions for a specified actor
+  rpc ExecuteActorStateTransaction(ExecuteActorStateTransactionRequest) returns (google.protobuf.Empty) {}
+
+  // InvokeActor calls a method on an actor.
+  rpc InvokeActor (InvokeActorRequest) returns (InvokeActorResponse) {}
 }
 
 // InvokeServiceRequest represents the request message for Service invocation.
@@ -58,6 +86,47 @@ message GetStateRequest {
 
   // The read consistency of the state store.
   common.v1.StateOptions.StateConsistency consistency = 3;
+
+  // The metadata which will be sent to state store components.
+  map<string,string> metadata = 4;
+}
+
+// GetBulkStateRequest is the message to get a list of key-value states from specific state store.
+message GetBulkStateRequest {
+  // The name of state store.
+  string store_name = 1;
+
+  // The keys to get.
+  repeated string keys = 2;
+
+  // The number of parallel operations executed on the state store for a get operation.
+  int32 parallelism = 3;
+
+  // The metadata which will be sent to state store components.
+  map<string,string> metadata = 4;
+}
+
+// GetBulkStateResponse is the response conveying the list of state values.
+message GetBulkStateResponse {
+  // The list of items containing the keys to get values for.
+  repeated BulkStateItem items = 1;
+}
+
+// BulkStateItem is the response item for a bulk get operation.
+// Return values include the item key, data and etag.
+message BulkStateItem {
+  // state item key
+  string key = 1;
+
+  // The byte array data
+  bytes data = 2;
+
+  // The entity tag which represents the specific version of data.
+  // ETag format is defined by the corresponding data store.
+  string etag = 3;
+
+  // The error that was returned from the state store in case of a failed get operation.
+  string error = 4;
 }
 
 // GetStateResponse is the response conveying the state value and etag.
@@ -85,6 +154,9 @@ message DeleteStateRequest {
   // State operation options which includes concurrency/
   // consistency/retry_policy.
   common.v1.StateOptions options = 4;
+
+  // The metadata which will be sent to state store components.
+  map<string,string> metadata = 5;
 }
 
 // SaveStateRequest is the message to save multiple states into state store.
@@ -98,11 +170,17 @@ message SaveStateRequest {
 
 // PublishEventRequest is the message to publish event data to pubsub topic
 message PublishEventRequest {
+  // The name of the pubsub component
+  string pubsub_name = 1;
+
   // The pubsub topic
-  string topic = 1;
+  string topic = 2;
 
   // The data which will be published to topic.
-  bytes data = 2;
+  bytes data = 3;
+
+  // The content type for the data (optional).
+  string dataContentType = 4;
 }
 
 // InvokeBindingRequest is the message to send data to output bindings
@@ -147,9 +225,104 @@ message GetSecretRequest {
   map<string,string> metadata = 3;
 }
 
-// GetSecretResponse is the response mesage to convey the requested secret.
+// GetSecretResponse is the response message to convey the requested secret.
 message GetSecretResponse {
   // data is the secret value. Some secret store, such as kubernetes secret
   // store, can save multiple secrets for single secret key.
   map<string, string> data = 1;
+}
+
+// TransactionalStateOperation is the message to execute a specified operation with a key-value pair.
+message TransactionalStateOperation {
+  // The type of operation to be executed
+  string operationType = 1;
+
+  // State values to be operated on 
+  common.v1.StateItem request = 2;
+}
+
+// ExecuteStateTransactionRequest is the message to execute multiple operations on a specified store.
+message ExecuteStateTransactionRequest {
+  // Required. name of state store.
+  string storeName = 1;
+
+  // Required. transactional operation list.
+  repeated TransactionalStateOperation operations = 2;
+
+  // The metadata used for transactional operations.
+  map<string,string> metadata = 3;
+}
+
+// RegisterActorTimerRequest is the message to register a timer for an actor of a given type and id.
+message RegisterActorTimerRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string name = 3;
+  string due_time = 4;
+  string period = 5;
+  string callback = 6;
+  bytes  data = 7;
+}
+
+// UnregisterActorTimerRequest is the message to unregister an actor timer
+message UnregisterActorTimerRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string name = 3;
+}
+
+// RegisterActorReminderRequest is the message to register a reminder for an actor of a given type and id.
+message RegisterActorReminderRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string name = 3;
+  string due_time = 4;
+  string period = 5;
+  bytes  data = 6;
+}
+
+// UnregisterActorReminderRequest is the message to unregister an actor reminder.
+message UnregisterActorReminderRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string name = 3;
+}
+
+// GetActorStateRequest is the message to get key-value states from specific actor.
+message GetActorStateRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string key = 3;
+}
+
+// GetActorStateResponse is the response conveying the actor's state value.
+message GetActorStateResponse {
+  bytes data = 1;
+}
+
+// ExecuteActorStateTransactionRequest is the message to execute multiple operations on a specified actor.
+message ExecuteActorStateTransactionRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  repeated TransactionalActorStateOperation operations = 3;
+}
+
+// TransactionalAcorStateOperation is the message to execute a specified operation with a key-value pair.
+message TransactionalActorStateOperation {
+  string operationType = 1;
+  string key = 2;
+  google.protobuf.Any value = 3;
+}
+
+// InvokeActorRequest is the message to call an actor.
+message InvokeActorRequest {
+  string actor_type = 1;
+  string actor_id = 2;
+  string method = 3;
+  bytes  data = 4;
+}
+
+// InvokeActorResponse is the method that returns an actor invocation response.
+message InvokeActorResponse {
+  bytes data = 1;
 }
