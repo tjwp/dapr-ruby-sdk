@@ -3,6 +3,7 @@
 
 require 'google/protobuf'
 
+require 'google/protobuf/any_pb'
 require 'google/protobuf/empty_pb'
 require 'dapr/proto/common/v1/common_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
@@ -15,6 +16,22 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :store_name, :string, 1
       optional :key, :string, 2
       optional :consistency, :enum, 3, "dapr.proto.common.v1.StateOptions.StateConsistency"
+      map :metadata, :string, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.GetBulkStateRequest" do
+      optional :store_name, :string, 1
+      repeated :keys, :string, 2
+      optional :parallelism, :int32, 3
+      map :metadata, :string, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.GetBulkStateResponse" do
+      repeated :items, :message, 1, "dapr.proto.runtime.v1.BulkStateItem"
+    end
+    add_message "dapr.proto.runtime.v1.BulkStateItem" do
+      optional :key, :string, 1
+      optional :data, :bytes, 2
+      optional :etag, :string, 3
+      optional :error, :string, 4
     end
     add_message "dapr.proto.runtime.v1.GetStateResponse" do
       optional :data, :bytes, 1
@@ -25,14 +42,17 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :key, :string, 2
       optional :etag, :string, 3
       optional :options, :message, 4, "dapr.proto.common.v1.StateOptions"
+      map :metadata, :string, :string, 5
     end
     add_message "dapr.proto.runtime.v1.SaveStateRequest" do
       optional :store_name, :string, 1
       repeated :states, :message, 2, "dapr.proto.common.v1.StateItem"
     end
     add_message "dapr.proto.runtime.v1.PublishEventRequest" do
-      optional :topic, :string, 1
-      optional :data, :bytes, 2
+      optional :pubsub_name, :string, 1
+      optional :topic, :string, 2
+      optional :data, :bytes, 3
+      optional :dataContentType, :string, 4
     end
     add_message "dapr.proto.runtime.v1.InvokeBindingRequest" do
       optional :name, :string, 1
@@ -52,6 +72,69 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "dapr.proto.runtime.v1.GetSecretResponse" do
       map :data, :string, :string, 1
     end
+    add_message "dapr.proto.runtime.v1.TransactionalStateOperation" do
+      optional :operationType, :string, 1
+      optional :request, :message, 2, "dapr.proto.common.v1.StateItem"
+    end
+    add_message "dapr.proto.runtime.v1.ExecuteStateTransactionRequest" do
+      optional :storeName, :string, 1
+      repeated :operations, :message, 2, "dapr.proto.runtime.v1.TransactionalStateOperation"
+      map :metadata, :string, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.RegisterActorTimerRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :name, :string, 3
+      optional :due_time, :string, 4
+      optional :period, :string, 5
+      optional :callback, :string, 6
+      optional :data, :bytes, 7
+    end
+    add_message "dapr.proto.runtime.v1.UnregisterActorTimerRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :name, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.RegisterActorReminderRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :name, :string, 3
+      optional :due_time, :string, 4
+      optional :period, :string, 5
+      optional :data, :bytes, 6
+    end
+    add_message "dapr.proto.runtime.v1.UnregisterActorReminderRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :name, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.GetActorStateRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :key, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.GetActorStateResponse" do
+      optional :data, :bytes, 1
+    end
+    add_message "dapr.proto.runtime.v1.ExecuteActorStateTransactionRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      repeated :operations, :message, 3, "dapr.proto.runtime.v1.TransactionalActorStateOperation"
+    end
+    add_message "dapr.proto.runtime.v1.TransactionalActorStateOperation" do
+      optional :operationType, :string, 1
+      optional :key, :string, 2
+      optional :value, :message, 3, "google.protobuf.Any"
+    end
+    add_message "dapr.proto.runtime.v1.InvokeActorRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :method, :string, 3
+      optional :data, :bytes, 4
+    end
+    add_message "dapr.proto.runtime.v1.InvokeActorResponse" do
+      optional :data, :bytes, 1
+    end
   end
 end
 
@@ -61,6 +144,9 @@ module Dapr
       module V1
         InvokeServiceRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeServiceRequest").msgclass
         GetStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetStateRequest").msgclass
+        GetBulkStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetBulkStateRequest").msgclass
+        GetBulkStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetBulkStateResponse").msgclass
+        BulkStateItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkStateItem").msgclass
         GetStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetStateResponse").msgclass
         DeleteStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DeleteStateRequest").msgclass
         SaveStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SaveStateRequest").msgclass
@@ -69,6 +155,18 @@ module Dapr
         InvokeBindingResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeBindingResponse").msgclass
         GetSecretRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetSecretRequest").msgclass
         GetSecretResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetSecretResponse").msgclass
+        TransactionalStateOperation = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TransactionalStateOperation").msgclass
+        ExecuteStateTransactionRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ExecuteStateTransactionRequest").msgclass
+        RegisterActorTimerRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisterActorTimerRequest").msgclass
+        UnregisterActorTimerRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnregisterActorTimerRequest").msgclass
+        RegisterActorReminderRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisterActorReminderRequest").msgclass
+        UnregisterActorReminderRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnregisterActorReminderRequest").msgclass
+        GetActorStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetActorStateRequest").msgclass
+        GetActorStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetActorStateResponse").msgclass
+        ExecuteActorStateTransactionRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ExecuteActorStateTransactionRequest").msgclass
+        TransactionalActorStateOperation = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TransactionalActorStateOperation").msgclass
+        InvokeActorRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeActorRequest").msgclass
+        InvokeActorResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeActorResponse").msgclass
       end
     end
   end

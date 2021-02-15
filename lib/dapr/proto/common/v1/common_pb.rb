@@ -4,7 +4,6 @@
 require 'google/protobuf'
 
 require 'google/protobuf/any_pb'
-require 'google/protobuf/duration_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("dapr/proto/common/v1/common.proto", :syntax => :proto3) do
     add_message "dapr.proto.common.v1.HTTPExtension" do
@@ -42,7 +41,6 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "dapr.proto.common.v1.StateOptions" do
       optional :concurrency, :enum, 1, "dapr.proto.common.v1.StateOptions.StateConcurrency"
       optional :consistency, :enum, 2, "dapr.proto.common.v1.StateOptions.StateConsistency"
-      optional :retry_policy, :message, 3, "dapr.proto.common.v1.StateRetryPolicy"
     end
     add_enum "dapr.proto.common.v1.StateOptions.StateConcurrency" do
       value :CONCURRENCY_UNSPECIFIED, 0
@@ -53,16 +51,6 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       value :CONSISTENCY_UNSPECIFIED, 0
       value :CONSISTENCY_EVENTUAL, 1
       value :CONSISTENCY_STRONG, 2
-    end
-    add_message "dapr.proto.common.v1.StateRetryPolicy" do
-      optional :threshold, :int32, 1
-      optional :pattern, :enum, 2, "dapr.proto.common.v1.StateRetryPolicy.RetryPattern"
-      optional :interval, :message, 3, "google.protobuf.Duration"
-    end
-    add_enum "dapr.proto.common.v1.StateRetryPolicy.RetryPattern" do
-      value :RETRY_UNSPECIFIED, 0
-      value :RETRY_LINEAR, 1
-      value :RETRY_EXPONENTIAL, 2
     end
   end
 end
@@ -79,8 +67,6 @@ module Dapr
         StateOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions").msgclass
         StateOptions::StateConcurrency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConcurrency").enummodule
         StateOptions::StateConsistency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConsistency").enummodule
-        StateRetryPolicy = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateRetryPolicy").msgclass
-        StateRetryPolicy::RetryPattern = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateRetryPolicy.RetryPattern").enummodule
       end
     end
   end

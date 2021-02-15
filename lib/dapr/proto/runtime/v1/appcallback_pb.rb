@@ -15,6 +15,15 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :data_content_type, :string, 5
       optional :data, :bytes, 7
       optional :topic, :string, 6
+      optional :pubsub_name, :string, 8
+    end
+    add_message "dapr.proto.runtime.v1.TopicEventResponse" do
+      optional :status, :enum, 1, "dapr.proto.runtime.v1.TopicEventResponse.TopicEventResponseStatus"
+    end
+    add_enum "dapr.proto.runtime.v1.TopicEventResponse.TopicEventResponseStatus" do
+      value :SUCCESS, 0
+      value :RETRY, 1
+      value :DROP, 2
     end
     add_message "dapr.proto.runtime.v1.BindingEventRequest" do
       optional :name, :string, 1
@@ -36,8 +45,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :subscriptions, :message, 1, "dapr.proto.runtime.v1.TopicSubscription"
     end
     add_message "dapr.proto.runtime.v1.TopicSubscription" do
-      optional :topic, :string, 1
-      map :metadata, :string, :string, 2
+      optional :pubsub_name, :string, 1
+      optional :topic, :string, 2
+      map :metadata, :string, :string, 3
     end
     add_message "dapr.proto.runtime.v1.ListInputBindingsResponse" do
       repeated :bindings, :string, 1
@@ -50,6 +60,8 @@ module Dapr
     module Runtime
       module V1
         TopicEventRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TopicEventRequest").msgclass
+        TopicEventResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TopicEventResponse").msgclass
+        TopicEventResponse::TopicEventResponseStatus = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TopicEventResponse.TopicEventResponseStatus").enummodule
         BindingEventRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BindingEventRequest").msgclass
         BindingEventResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BindingEventResponse").msgclass
         BindingEventResponse::BindingEventConcurrency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BindingEventResponse.BindingEventConcurrency").enummodule
