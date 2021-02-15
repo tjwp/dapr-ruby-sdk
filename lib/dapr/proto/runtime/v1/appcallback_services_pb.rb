@@ -31,7 +31,7 @@ module Dapr
             # Lists all topics subscribed by this app.
             rpc :ListTopicSubscriptions, Google::Protobuf::Empty, ListTopicSubscriptionsResponse
             # Subscribes events from Pubsub
-            rpc :OnTopicEvent, TopicEventRequest, Google::Protobuf::Empty
+            rpc :OnTopicEvent, TopicEventRequest, TopicEventResponse
             # Lists all input bindings subscribed by this app.
             rpc :ListInputBindings, Google::Protobuf::Empty, ListInputBindingsResponse
             # Listens events from the input bindings

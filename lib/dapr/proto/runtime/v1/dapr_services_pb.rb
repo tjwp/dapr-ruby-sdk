@@ -25,20 +25,37 @@ module Dapr
             self.service_name = 'dapr.proto.runtime.v1.Dapr'
 
             # Invokes a method on a remote Dapr app.
-            # Nested Dapr modules are problematic so this must be prefixed as a top-level constant
             rpc :InvokeService, InvokeServiceRequest, ::Dapr::Proto::Common::V1::InvokeResponse
             # Gets the state for a specific key.
             rpc :GetState, GetStateRequest, GetStateResponse
+            # Gets a bulk of state items for a list of keys
+            rpc :GetBulkState, GetBulkStateRequest, GetBulkStateResponse
             # Saves the state for a specific key.
             rpc :SaveState, SaveStateRequest, Google::Protobuf::Empty
             # Deletes the state for a specific key.
             rpc :DeleteState, DeleteStateRequest, Google::Protobuf::Empty
+            # Executes transactions for a specified store
+            rpc :ExecuteStateTransaction, ExecuteStateTransactionRequest, Google::Protobuf::Empty
             # Publishes events to the specific topic.
             rpc :PublishEvent, PublishEventRequest, Google::Protobuf::Empty
             # Invokes binding data to specific output bindings
             rpc :InvokeBinding, InvokeBindingRequest, InvokeBindingResponse
             # Gets secrets from secret stores.
             rpc :GetSecret, GetSecretRequest, GetSecretResponse
+            # Register an actor timer.
+            rpc :RegisterActorTimer, RegisterActorTimerRequest, Google::Protobuf::Empty
+            # Unregister an actor timer.
+            rpc :UnregisterActorTimer, UnregisterActorTimerRequest, Google::Protobuf::Empty
+            # Register an actor reminder.
+            rpc :RegisterActorReminder, RegisterActorReminderRequest, Google::Protobuf::Empty
+            # Unregister an actor reminder.
+            rpc :UnregisterActorReminder, UnregisterActorReminderRequest, Google::Protobuf::Empty
+            # Gets the state for a specific actor.
+            rpc :GetActorState, GetActorStateRequest, GetActorStateResponse
+            # Executes state transactions for a specified actor
+            rpc :ExecuteActorStateTransaction, ExecuteActorStateTransactionRequest, Google::Protobuf::Empty
+            # InvokeActor calls a method on an actor.
+            rpc :InvokeActor, InvokeActorRequest, InvokeActorResponse
           end
 
           Stub = Service.rpc_stub_class
