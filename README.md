@@ -28,9 +28,9 @@ Or install it yourself as:
 A client can be created as follows:
 
 ```ruby
-require "dapr_services_pb"
+require "dapr/proto/runtime/v1/dapr_services_pb"
 
-client = Dapr::Dapr::Stub.new('localhost:5001', :this_channel_is_insecure)
+client = Dapr::Proto::Runtime::V1::Dapr::Stub.new("localhost:#{ENV['DAPR_GRPC_PORT']}", :this_channel_is_insecure)
 ```
 
 You can find a complete example [here](https://github.com/tjwp/dapr-ruby-sdk/blob/master/example.rb)
@@ -40,7 +40,7 @@ You can find a complete example [here](https://github.com/tjwp/dapr-ruby-sdk/blo
 You can execute this code using the local dapr runtime:
 
 ```sh
-dapr run --protocol grpc --grpc-port=50001 ruby example.rb
+dapr run --app-id ruby-example -- bundle exec ruby example.rb
 ```
 
 ## Development
