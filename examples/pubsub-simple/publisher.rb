@@ -9,7 +9,11 @@ RuntimeV1 = Dapr::Proto::Runtime::V1
 port = ENV["DAPR_GRPC_PORT"]
 client = Dapr::Proto::Runtime::V1::Dapr::Stub.new("localhost:#{port}", :this_channel_is_insecure)
 
-client.publish_event(RuntimeV1::PublishEventRequest.
-    new(topic: "TOPIC_A", data: "ACTION=1"))
+# This matches the name of the pubsub component used
+pubsub_name = "pubsub"
 
-puts "Published!"
+data = "ACTION=1"
+client.publish_event(RuntimeV1::PublishEventRequest.
+    new(pubsub_name: pubsub_name, topic: "TOPIC_A", data: data))
+
+puts "Published #{data}"
