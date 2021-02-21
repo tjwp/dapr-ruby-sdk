@@ -10,8 +10,8 @@ To run this example, use the following code:
 
 ```
 # 1. Start Receiver (expose gRPC receiver server on port 50051)
-dapr run --app-id invoke-receiver --protocol grpc --app-port 50051 bundle exec ruby invoke-receiver.rb
+dapr run --app-id invoke-receiver --app-protocol grpc --app-port 50051 -- bundle exec ruby invoke-receiver.rb
 
 # 2. Start Caller
-dapr run --app-id invoke-caller --protocol grpc bundle exec ruby invoke-caller.rb
+dapr run --app-id invoke-caller -- bundle exec ruby invoke-caller.rb
 ```

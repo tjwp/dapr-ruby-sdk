@@ -9,6 +9,7 @@ class InvokeReceiverService < Dapr::Proto::Runtime::V1::AppCallback::Service
 
   def on_invoke(invoke, _call)
     content_type = "text/plain; charset=UTF-8"
+    puts "Invoked method '#{invoke["method"]}' with value '#{invoke["data"]["value"]}'"
     data = if invoke["method"] == "my-method"
              Any.new(value: "INVOKE_RECEIVED")
            else
