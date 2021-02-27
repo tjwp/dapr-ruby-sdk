@@ -8,7 +8,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("dapr/proto/common/v1/common.proto", :syntax => :proto3) do
     add_message "dapr.proto.common.v1.HTTPExtension" do
       optional :verb, :enum, 1, "dapr.proto.common.v1.HTTPExtension.Verb"
-      map :querystring, :string, :string, 2
+      optional :querystring, :string, 2
     end
     add_enum "dapr.proto.common.v1.HTTPExtension.Verb" do
       value :NONE, 0
@@ -34,9 +34,12 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "dapr.proto.common.v1.StateItem" do
       optional :key, :string, 1
       optional :value, :bytes, 2
-      optional :etag, :string, 3
+      optional :etag, :message, 3, "dapr.proto.common.v1.Etag"
       map :metadata, :string, :string, 4
       optional :options, :message, 5, "dapr.proto.common.v1.StateOptions"
+    end
+    add_message "dapr.proto.common.v1.Etag" do
+      optional :value, :string, 1
     end
     add_message "dapr.proto.common.v1.StateOptions" do
       optional :concurrency, :enum, 1, "dapr.proto.common.v1.StateOptions.StateConcurrency"
@@ -64,6 +67,7 @@ module Dapr
         InvokeRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.InvokeRequest").msgclass
         InvokeResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.InvokeResponse").msgclass
         StateItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateItem").msgclass
+        Etag = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.Etag").msgclass
         StateOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions").msgclass
         StateOptions::StateConcurrency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConcurrency").enummodule
         StateOptions::StateConsistency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConsistency").enummodule

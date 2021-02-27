@@ -2,7 +2,7 @@
 # Source: dapr/proto/runtime/v1/dapr.proto for package 'dapr.proto.runtime.v1'
 # Original file comments:
 # ------------------------------------------------------------
-# Copyright (c) Microsoft Corporation.
+# Copyright (c) Microsoft Corporation and Dapr Contributors.
 # Licensed under the MIT License.
 # ------------------------------------------------------------
 #
@@ -34,6 +34,8 @@ module Dapr
             rpc :SaveState, SaveStateRequest, Google::Protobuf::Empty
             # Deletes the state for a specific key.
             rpc :DeleteState, DeleteStateRequest, Google::Protobuf::Empty
+            # Deletes a bulk of state items for a list of keys
+            rpc :DeleteBulkState, DeleteBulkStateRequest, Google::Protobuf::Empty
             # Executes transactions for a specified store
             rpc :ExecuteStateTransaction, ExecuteStateTransactionRequest, Google::Protobuf::Empty
             # Publishes events to the specific topic.
@@ -42,6 +44,8 @@ module Dapr
             rpc :InvokeBinding, InvokeBindingRequest, InvokeBindingResponse
             # Gets secrets from secret stores.
             rpc :GetSecret, GetSecretRequest, GetSecretResponse
+            # Gets a bulk of secrets
+            rpc :GetBulkSecret, GetBulkSecretRequest, GetBulkSecretResponse
             # Register an actor timer.
             rpc :RegisterActorTimer, RegisterActorTimerRequest, Google::Protobuf::Empty
             # Unregister an actor timer.
@@ -56,6 +60,10 @@ module Dapr
             rpc :ExecuteActorStateTransaction, ExecuteActorStateTransactionRequest, Google::Protobuf::Empty
             # InvokeActor calls a method on an actor.
             rpc :InvokeActor, InvokeActorRequest, InvokeActorResponse
+            # Gets metadata of the sidecar
+            rpc :GetMetadata, Google::Protobuf::Empty, GetMetadataResponse
+            # Sets value in extended metadata of the sidecar
+            rpc :SetMetadata, SetMetadataRequest, Google::Protobuf::Empty
           end
 
           Stub = Service.rpc_stub_class
