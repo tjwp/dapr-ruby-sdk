@@ -1,11 +1,15 @@
 # Dapr SDK for Ruby
 
-This is the Dapr SDK for Ruby, based on the auto-generated proto client.<br>
+This is a Dapr SDK for Ruby, based on the auto-generated proto client.<br>
 
-For more info on Dapr and gRPC, visit [this link](https://github.com/dapr/docs/tree/master/howto/create-grpc-app).
+For more infomation on Dapr and gRPC see the [getting started guides](https://docs.dapr.io/getting-started/).
 
 The repository generates the following package
 - dapr-client
+
+## Supported Versions
+
+The auto-generated proto client and the examples is this repo are based on Dapr v1.0.0.
 
 ## Installation
 
@@ -35,7 +39,7 @@ client = Dapr::Proto::Runtime::V1::Dapr::Stub.new("localhost:#{ENV['DAPR_GRPC_PO
 
 You can find a complete example [here](https://github.com/tjwp/dapr-ruby-sdk/blob/master/example.rb)
 
-### Running the code locally
+### Running the example code locally
 
 You can execute this code using the local dapr runtime:
 
