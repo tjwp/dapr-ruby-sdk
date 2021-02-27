@@ -32,17 +32,23 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :data, :bytes, 2
       optional :etag, :string, 3
       optional :error, :string, 4
+      map :metadata, :string, :string, 5
     end
     add_message "dapr.proto.runtime.v1.GetStateResponse" do
       optional :data, :bytes, 1
       optional :etag, :string, 2
+      map :metadata, :string, :string, 3
     end
     add_message "dapr.proto.runtime.v1.DeleteStateRequest" do
       optional :store_name, :string, 1
       optional :key, :string, 2
-      optional :etag, :string, 3
+      optional :etag, :message, 3, "dapr.proto.common.v1.Etag"
       optional :options, :message, 4, "dapr.proto.common.v1.StateOptions"
       map :metadata, :string, :string, 5
+    end
+    add_message "dapr.proto.runtime.v1.DeleteBulkStateRequest" do
+      optional :store_name, :string, 1
+      repeated :states, :message, 2, "dapr.proto.common.v1.StateItem"
     end
     add_message "dapr.proto.runtime.v1.SaveStateRequest" do
       optional :store_name, :string, 1
@@ -52,7 +58,8 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :pubsub_name, :string, 1
       optional :topic, :string, 2
       optional :data, :bytes, 3
-      optional :dataContentType, :string, 4
+      optional :data_content_type, :string, 4
+      map :metadata, :string, :string, 5
     end
     add_message "dapr.proto.runtime.v1.InvokeBindingRequest" do
       optional :name, :string, 1
@@ -71,6 +78,16 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     end
     add_message "dapr.proto.runtime.v1.GetSecretResponse" do
       map :data, :string, :string, 1
+    end
+    add_message "dapr.proto.runtime.v1.GetBulkSecretRequest" do
+      optional :store_name, :string, 1
+      map :metadata, :string, :string, 2
+    end
+    add_message "dapr.proto.runtime.v1.SecretResponse" do
+      map :secrets, :string, :string, 1
+    end
+    add_message "dapr.proto.runtime.v1.GetBulkSecretResponse" do
+      map :data, :string, :message, 1, "dapr.proto.runtime.v1.SecretResponse"
     end
     add_message "dapr.proto.runtime.v1.TransactionalStateOperation" do
       optional :operationType, :string, 1
@@ -135,6 +152,25 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "dapr.proto.runtime.v1.InvokeActorResponse" do
       optional :data, :bytes, 1
     end
+    add_message "dapr.proto.runtime.v1.GetMetadataResponse" do
+      optional :id, :string, 1
+      repeated :active_actors_count, :message, 2, "dapr.proto.runtime.v1.ActiveActorsCount"
+      repeated :registered_components, :message, 3, "dapr.proto.runtime.v1.RegisteredComponents"
+      map :extended_metadata, :string, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.ActiveActorsCount" do
+      optional :type, :string, 1
+      optional :count, :int32, 2
+    end
+    add_message "dapr.proto.runtime.v1.RegisteredComponents" do
+      optional :name, :string, 1
+      optional :type, :string, 2
+      optional :version, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.SetMetadataRequest" do
+      optional :key, :string, 1
+      optional :value, :string, 2
+    end
   end
 end
 
@@ -149,12 +185,16 @@ module Dapr
         BulkStateItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkStateItem").msgclass
         GetStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetStateResponse").msgclass
         DeleteStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DeleteStateRequest").msgclass
+        DeleteBulkStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DeleteBulkStateRequest").msgclass
         SaveStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SaveStateRequest").msgclass
         PublishEventRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PublishEventRequest").msgclass
         InvokeBindingRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeBindingRequest").msgclass
         InvokeBindingResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeBindingResponse").msgclass
         GetSecretRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetSecretRequest").msgclass
         GetSecretResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetSecretResponse").msgclass
+        GetBulkSecretRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetBulkSecretRequest").msgclass
+        SecretResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SecretResponse").msgclass
+        GetBulkSecretResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetBulkSecretResponse").msgclass
         TransactionalStateOperation = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TransactionalStateOperation").msgclass
         ExecuteStateTransactionRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ExecuteStateTransactionRequest").msgclass
         RegisterActorTimerRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisterActorTimerRequest").msgclass
@@ -167,6 +207,10 @@ module Dapr
         TransactionalActorStateOperation = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TransactionalActorStateOperation").msgclass
         InvokeActorRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeActorRequest").msgclass
         InvokeActorResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeActorResponse").msgclass
+        GetMetadataResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetMetadataResponse").msgclass
+        ActiveActorsCount = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ActiveActorsCount").msgclass
+        RegisteredComponents = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisteredComponents").msgclass
+        SetMetadataRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SetMetadataRequest").msgclass
       end
     end
   end
