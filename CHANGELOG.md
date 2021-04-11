@@ -1,5 +1,8 @@
 # dapr-client
 
+## v0.4.0
+- Auto-generated client based on Dapr v1.1.1.
+
 ## v0.3.0
 - Auto-generated client based on Dapr v1.0.0.
 

@@ -64,6 +64,8 @@ module Dapr
             rpc :GetMetadata, Google::Protobuf::Empty, GetMetadataResponse
             # Sets value in extended metadata of the sidecar
             rpc :SetMetadata, SetMetadataRequest, Google::Protobuf::Empty
+            # Shutdown the sidecar
+            rpc :Shutdown, Google::Protobuf::Empty, Google::Protobuf::Empty
           end
 
           Stub = Service.rpc_stub_class
