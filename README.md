@@ -9,7 +9,7 @@ The repository generates the following package
 
 ## Supported Versions
 
-The auto-generated proto client and the examples is this repo are based on Dapr v1.0.0.
+The auto-generated proto client and the examples is this repo are based on Dapr v1.1.1.
 
 ## Installation
 
