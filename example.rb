@@ -7,7 +7,7 @@ dapr_uri = "localhost:#{port}"
 
 client = Dapr::Proto::Runtime::V1::Dapr::Stub.new(dapr_uri, :this_channel_is_insecure)
 data = 'lala'
-client.publish_event(Dapr::Proto::Runtime::V1::PublishEventRequest.new(pubsub_name: 'pubsub', topic: 'sith', data: 'lala'))
+client.publish_event(Dapr::Proto::Runtime::V1::PublishEventRequest.new(pubsub_name: 'pubsub', topic: 'sith', data: data))
 puts('Published')
 
 key = 'mykey'
