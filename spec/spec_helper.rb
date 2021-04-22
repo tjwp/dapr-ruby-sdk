@@ -10,7 +10,7 @@ module RubyLogger
   end
 
   LOGGER = Logger.new(STDOUT)
-  LOGGER.level = Logger::WARN
+  LOGGER.level = Logger::DEBUG
 end
 
 # GRPC is the general RPC module
