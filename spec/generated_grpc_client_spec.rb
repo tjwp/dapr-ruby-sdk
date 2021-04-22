@@ -4,8 +4,9 @@ require "dapr/test/fake_dapr_sidecar"
 
 RSpec.describe "generated GRPC client" do
   let(:server) { FakeDaprSidecar.new }
-  let(:server_port) { "0.0.0.0:50051" }
-  let(:client) { Dapr::Proto::Runtime::V1::Dapr::Stub.new("localhost:50051", :this_channel_is_insecure) }
+  let(:port) { rand(10000..60000) }
+  let(:server_port) { "0.0.0.0:#{port}" }
+  let(:client) { Dapr::Proto::Runtime::V1::Dapr::Stub.new("localhost:#{port}", :this_channel_is_insecure) }
 
   before { server.start(port: server_port) }
   after { server.stop }
