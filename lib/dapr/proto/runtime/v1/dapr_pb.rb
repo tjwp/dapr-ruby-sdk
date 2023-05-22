@@ -5,7 +5,9 @@ require 'google/protobuf'
 
 require 'google/protobuf/any_pb'
 require 'google/protobuf/empty_pb'
+require 'google/protobuf/timestamp_pb'
 require 'dapr/proto/common/v1/common_pb'
+
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("dapr/proto/runtime/v1/dapr.proto", :syntax => :proto3) do
     add_message "dapr.proto.runtime.v1.InvokeServiceRequest" do
@@ -54,12 +56,47 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :store_name, :string, 1
       repeated :states, :message, 2, "dapr.proto.common.v1.StateItem"
     end
+    add_message "dapr.proto.runtime.v1.QueryStateRequest" do
+      optional :store_name, :string, 1, json_name: "storeName"
+      optional :query, :string, 2
+      map :metadata, :string, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.QueryStateItem" do
+      optional :key, :string, 1
+      optional :data, :bytes, 2
+      optional :etag, :string, 3
+      optional :error, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.QueryStateResponse" do
+      repeated :results, :message, 1, "dapr.proto.runtime.v1.QueryStateItem"
+      optional :token, :string, 2
+      map :metadata, :string, :string, 3
+    end
     add_message "dapr.proto.runtime.v1.PublishEventRequest" do
       optional :pubsub_name, :string, 1
       optional :topic, :string, 2
       optional :data, :bytes, 3
       optional :data_content_type, :string, 4
       map :metadata, :string, :string, 5
+    end
+    add_message "dapr.proto.runtime.v1.BulkPublishRequest" do
+      optional :pubsub_name, :string, 1
+      optional :topic, :string, 2
+      repeated :entries, :message, 3, "dapr.proto.runtime.v1.BulkPublishRequestEntry"
+      map :metadata, :string, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.BulkPublishRequestEntry" do
+      optional :entry_id, :string, 1
+      optional :event, :bytes, 2
+      optional :content_type, :string, 3
+      map :metadata, :string, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.BulkPublishResponse" do
+      repeated :failedEntries, :message, 1, "dapr.proto.runtime.v1.BulkPublishResponseFailedEntry"
+    end
+    add_message "dapr.proto.runtime.v1.BulkPublishResponseFailedEntry" do
+      optional :entry_id, :string, 1
+      optional :error, :string, 2
     end
     add_message "dapr.proto.runtime.v1.InvokeBindingRequest" do
       optional :name, :string, 1
@@ -72,7 +109,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       map :metadata, :string, :string, 2
     end
     add_message "dapr.proto.runtime.v1.GetSecretRequest" do
-      optional :store_name, :string, 1
+      optional :store_name, :string, 1, json_name: "storeName"
       optional :key, :string, 2
       map :metadata, :string, :string, 3
     end
@@ -80,7 +117,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       map :data, :string, :string, 1
     end
     add_message "dapr.proto.runtime.v1.GetBulkSecretRequest" do
-      optional :store_name, :string, 1
+      optional :store_name, :string, 1, json_name: "storeName"
       map :metadata, :string, :string, 2
     end
     add_message "dapr.proto.runtime.v1.SecretResponse" do
@@ -106,6 +143,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :period, :string, 5
       optional :callback, :string, 6
       optional :data, :bytes, 7
+      optional :ttl, :string, 8
     end
     add_message "dapr.proto.runtime.v1.UnregisterActorTimerRequest" do
       optional :actor_type, :string, 1
@@ -119,11 +157,18 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :due_time, :string, 4
       optional :period, :string, 5
       optional :data, :bytes, 6
+      optional :ttl, :string, 7
     end
     add_message "dapr.proto.runtime.v1.UnregisterActorReminderRequest" do
       optional :actor_type, :string, 1
       optional :actor_id, :string, 2
       optional :name, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.RenameActorReminderRequest" do
+      optional :actor_type, :string, 1
+      optional :actor_id, :string, 2
+      optional :old_name, :string, 3
+      optional :new_name, :string, 4
     end
     add_message "dapr.proto.runtime.v1.GetActorStateRequest" do
       optional :actor_type, :string, 1
@@ -142,12 +187,14 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :operationType, :string, 1
       optional :key, :string, 2
       optional :value, :message, 3, "google.protobuf.Any"
+      map :metadata, :string, :string, 4
     end
     add_message "dapr.proto.runtime.v1.InvokeActorRequest" do
       optional :actor_type, :string, 1
       optional :actor_id, :string, 2
       optional :method, :string, 3
       optional :data, :bytes, 4
+      map :metadata, :string, :string, 5
     end
     add_message "dapr.proto.runtime.v1.InvokeActorResponse" do
       optional :data, :bytes, 1
@@ -157,6 +204,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :active_actors_count, :message, 2, "dapr.proto.runtime.v1.ActiveActorsCount"
       repeated :registered_components, :message, 3, "dapr.proto.runtime.v1.RegisteredComponents"
       map :extended_metadata, :string, :string, 4
+      repeated :subscriptions, :message, 5, "dapr.proto.runtime.v1.PubsubSubscription"
     end
     add_message "dapr.proto.runtime.v1.ActiveActorsCount" do
       optional :type, :string, 1
@@ -166,10 +214,219 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :name, :string, 1
       optional :type, :string, 2
       optional :version, :string, 3
+      repeated :capabilities, :string, 4
+    end
+    add_message "dapr.proto.runtime.v1.PubsubSubscription" do
+      optional :pubsub_name, :string, 1
+      optional :topic, :string, 2
+      map :metadata, :string, :string, 3
+      optional :rules, :message, 4, "dapr.proto.runtime.v1.PubsubSubscriptionRules"
+      optional :dead_letter_topic, :string, 5
+    end
+    add_message "dapr.proto.runtime.v1.PubsubSubscriptionRules" do
+      repeated :rules, :message, 1, "dapr.proto.runtime.v1.PubsubSubscriptionRule"
+    end
+    add_message "dapr.proto.runtime.v1.PubsubSubscriptionRule" do
+      optional :match, :string, 1
+      optional :path, :string, 2
     end
     add_message "dapr.proto.runtime.v1.SetMetadataRequest" do
       optional :key, :string, 1
       optional :value, :string, 2
+    end
+    add_message "dapr.proto.runtime.v1.GetConfigurationRequest" do
+      optional :store_name, :string, 1
+      repeated :keys, :string, 2
+      map :metadata, :string, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.GetConfigurationResponse" do
+      map :items, :string, :message, 1, "dapr.proto.common.v1.ConfigurationItem"
+    end
+    add_message "dapr.proto.runtime.v1.SubscribeConfigurationRequest" do
+      optional :store_name, :string, 1
+      repeated :keys, :string, 2
+      map :metadata, :string, :string, 3
+    end
+    add_message "dapr.proto.runtime.v1.UnsubscribeConfigurationRequest" do
+      optional :store_name, :string, 1
+      optional :id, :string, 2
+    end
+    add_message "dapr.proto.runtime.v1.SubscribeConfigurationResponse" do
+      optional :id, :string, 1
+      map :items, :string, :message, 2, "dapr.proto.common.v1.ConfigurationItem"
+    end
+    add_message "dapr.proto.runtime.v1.UnsubscribeConfigurationResponse" do
+      optional :ok, :bool, 1
+      optional :message, :string, 2
+    end
+    add_message "dapr.proto.runtime.v1.TryLockRequest" do
+      optional :store_name, :string, 1, json_name: "storeName"
+      optional :resource_id, :string, 2, json_name: "resourceId"
+      optional :lock_owner, :string, 3, json_name: "lockOwner"
+      optional :expiry_in_seconds, :int32, 4, json_name: "expiryInSeconds"
+    end
+    add_message "dapr.proto.runtime.v1.TryLockResponse" do
+      optional :success, :bool, 1
+    end
+    add_message "dapr.proto.runtime.v1.UnlockRequest" do
+      optional :store_name, :string, 1, json_name: "storeName"
+      optional :resource_id, :string, 2, json_name: "resourceId"
+      optional :lock_owner, :string, 3, json_name: "lockOwner"
+    end
+    add_message "dapr.proto.runtime.v1.UnlockResponse" do
+      optional :status, :enum, 1, "dapr.proto.runtime.v1.UnlockResponse.Status"
+    end
+    add_enum "dapr.proto.runtime.v1.UnlockResponse.Status" do
+      value :SUCCESS, 0
+      value :LOCK_DOES_NOT_EXIST, 1
+      value :LOCK_BELONGS_TO_OTHERS, 2
+      value :INTERNAL_ERROR, 3
+    end
+    add_message "dapr.proto.runtime.v1.SubtleGetKeyRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :name, :string, 2
+      optional :format, :enum, 3, "dapr.proto.runtime.v1.SubtleGetKeyRequest.KeyFormat"
+    end
+    add_enum "dapr.proto.runtime.v1.SubtleGetKeyRequest.KeyFormat" do
+      value :PEM, 0
+      value :JSON, 1
+    end
+    add_message "dapr.proto.runtime.v1.SubtleGetKeyResponse" do
+      optional :name, :string, 1
+      optional :public_key, :string, 2, json_name: "publicKey"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleEncryptRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :plaintext, :bytes, 2
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+      optional :nonce, :bytes, 5
+      optional :associated_data, :bytes, 6, json_name: "associatedData"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleEncryptResponse" do
+      optional :ciphertext, :bytes, 1
+      optional :tag, :bytes, 2
+    end
+    add_message "dapr.proto.runtime.v1.SubtleDecryptRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :ciphertext, :bytes, 2
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+      optional :nonce, :bytes, 5
+      optional :tag, :bytes, 6
+      optional :associated_data, :bytes, 7, json_name: "associatedData"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleDecryptResponse" do
+      optional :plaintext, :bytes, 1
+    end
+    add_message "dapr.proto.runtime.v1.SubtleWrapKeyRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :plaintext_key, :bytes, 2, json_name: "plaintextKey"
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+      optional :nonce, :bytes, 5
+      optional :associated_data, :bytes, 6, json_name: "associatedData"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleWrapKeyResponse" do
+      optional :wrapped_key, :bytes, 1, json_name: "wrappedKey"
+      optional :tag, :bytes, 2
+    end
+    add_message "dapr.proto.runtime.v1.SubtleUnwrapKeyRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :wrapped_key, :bytes, 2, json_name: "wrappedKey"
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+      optional :nonce, :bytes, 5
+      optional :tag, :bytes, 6
+      optional :associated_data, :bytes, 7, json_name: "associatedData"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleUnwrapKeyResponse" do
+      optional :plaintext_key, :bytes, 1, json_name: "plaintextKey"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleSignRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :digest, :bytes, 2
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+    end
+    add_message "dapr.proto.runtime.v1.SubtleSignResponse" do
+      optional :signature, :bytes, 1
+    end
+    add_message "dapr.proto.runtime.v1.SubtleVerifyRequest" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :digest, :bytes, 2
+      optional :algorithm, :string, 3
+      optional :key_name, :string, 4, json_name: "keyName"
+      optional :signature, :bytes, 5
+    end
+    add_message "dapr.proto.runtime.v1.SubtleVerifyResponse" do
+      optional :valid, :bool, 1
+    end
+    add_message "dapr.proto.runtime.v1.EncryptRequest" do
+      optional :options, :message, 1, "dapr.proto.runtime.v1.EncryptRequestOptions"
+    end
+    add_message "dapr.proto.runtime.v1.EncryptRequestOptions" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :key_name, :string, 2, json_name: "keyName"
+      optional :key_wrap_algorithm, :string, 3
+      optional :data_encryption_cipher, :string, 10
+      optional :omit_decryption_key_name, :bool, 11, json_name: "omitDecryptionKeyName"
+      optional :decryption_key_name, :string, 12, json_name: "decryptionKeyName"
+    end
+    add_message "dapr.proto.runtime.v1.EncryptResponse" do
+    end
+    add_message "dapr.proto.runtime.v1.DecryptRequest" do
+      optional :options, :message, 1, "dapr.proto.runtime.v1.DecryptRequestOptions"
+    end
+    add_message "dapr.proto.runtime.v1.DecryptRequestOptions" do
+      optional :component_name, :string, 1, json_name: "componentName"
+      optional :key_name, :string, 12, json_name: "keyName"
+    end
+    add_message "dapr.proto.runtime.v1.DecryptResponse" do
+    end
+    add_message "dapr.proto.runtime.v1.GetWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+    end
+    add_message "dapr.proto.runtime.v1.GetWorkflowResponse" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_name, :string, 2, json_name: "workflowName"
+      optional :created_at, :message, 3, "google.protobuf.Timestamp", json_name: "createdAt"
+      optional :last_updated_at, :message, 4, "google.protobuf.Timestamp", json_name: "lastUpdatedAt"
+      optional :runtime_status, :string, 5, json_name: "runtimeStatus"
+      map :properties, :string, :string, 6
+    end
+    add_message "dapr.proto.runtime.v1.StartWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+      optional :workflow_name, :string, 3, json_name: "workflowName"
+      map :options, :string, :string, 4
+      optional :input, :bytes, 5
+    end
+    add_message "dapr.proto.runtime.v1.StartWorkflowResponse" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+    end
+    add_message "dapr.proto.runtime.v1.TerminateWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+    end
+    add_message "dapr.proto.runtime.v1.PauseWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+    end
+    add_message "dapr.proto.runtime.v1.ResumeWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+    end
+    add_message "dapr.proto.runtime.v1.RaiseEventWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
+      optional :event_name, :string, 3, json_name: "eventName"
+      optional :event_data, :bytes, 4
+    end
+    add_message "dapr.proto.runtime.v1.PurgeWorkflowRequest" do
+      optional :instance_id, :string, 1, json_name: "instanceID"
+      optional :workflow_component, :string, 2, json_name: "workflowComponent"
     end
   end
 end
@@ -187,7 +444,14 @@ module Dapr
         DeleteStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DeleteStateRequest").msgclass
         DeleteBulkStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DeleteBulkStateRequest").msgclass
         SaveStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SaveStateRequest").msgclass
+        QueryStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.QueryStateRequest").msgclass
+        QueryStateItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.QueryStateItem").msgclass
+        QueryStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.QueryStateResponse").msgclass
         PublishEventRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PublishEventRequest").msgclass
+        BulkPublishRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkPublishRequest").msgclass
+        BulkPublishRequestEntry = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkPublishRequestEntry").msgclass
+        BulkPublishResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkPublishResponse").msgclass
+        BulkPublishResponseFailedEntry = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.BulkPublishResponseFailedEntry").msgclass
         InvokeBindingRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeBindingRequest").msgclass
         InvokeBindingResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.InvokeBindingResponse").msgclass
         GetSecretRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetSecretRequest").msgclass
@@ -201,6 +465,7 @@ module Dapr
         UnregisterActorTimerRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnregisterActorTimerRequest").msgclass
         RegisterActorReminderRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisterActorReminderRequest").msgclass
         UnregisterActorReminderRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnregisterActorReminderRequest").msgclass
+        RenameActorReminderRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RenameActorReminderRequest").msgclass
         GetActorStateRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetActorStateRequest").msgclass
         GetActorStateResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetActorStateResponse").msgclass
         ExecuteActorStateTransactionRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ExecuteActorStateTransactionRequest").msgclass
@@ -210,7 +475,51 @@ module Dapr
         GetMetadataResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetMetadataResponse").msgclass
         ActiveActorsCount = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ActiveActorsCount").msgclass
         RegisteredComponents = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RegisteredComponents").msgclass
+        PubsubSubscription = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PubsubSubscription").msgclass
+        PubsubSubscriptionRules = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PubsubSubscriptionRules").msgclass
+        PubsubSubscriptionRule = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PubsubSubscriptionRule").msgclass
         SetMetadataRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SetMetadataRequest").msgclass
+        GetConfigurationRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetConfigurationRequest").msgclass
+        GetConfigurationResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetConfigurationResponse").msgclass
+        SubscribeConfigurationRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubscribeConfigurationRequest").msgclass
+        UnsubscribeConfigurationRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnsubscribeConfigurationRequest").msgclass
+        SubscribeConfigurationResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubscribeConfigurationResponse").msgclass
+        UnsubscribeConfigurationResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnsubscribeConfigurationResponse").msgclass
+        TryLockRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TryLockRequest").msgclass
+        TryLockResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TryLockResponse").msgclass
+        UnlockRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnlockRequest").msgclass
+        UnlockResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnlockResponse").msgclass
+        UnlockResponse::Status = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.UnlockResponse.Status").enummodule
+        SubtleGetKeyRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleGetKeyRequest").msgclass
+        SubtleGetKeyRequest::KeyFormat = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleGetKeyRequest.KeyFormat").enummodule
+        SubtleGetKeyResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleGetKeyResponse").msgclass
+        SubtleEncryptRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleEncryptRequest").msgclass
+        SubtleEncryptResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleEncryptResponse").msgclass
+        SubtleDecryptRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleDecryptRequest").msgclass
+        SubtleDecryptResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleDecryptResponse").msgclass
+        SubtleWrapKeyRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleWrapKeyRequest").msgclass
+        SubtleWrapKeyResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleWrapKeyResponse").msgclass
+        SubtleUnwrapKeyRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleUnwrapKeyRequest").msgclass
+        SubtleUnwrapKeyResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleUnwrapKeyResponse").msgclass
+        SubtleSignRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleSignRequest").msgclass
+        SubtleSignResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleSignResponse").msgclass
+        SubtleVerifyRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleVerifyRequest").msgclass
+        SubtleVerifyResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.SubtleVerifyResponse").msgclass
+        EncryptRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.EncryptRequest").msgclass
+        EncryptRequestOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.EncryptRequestOptions").msgclass
+        EncryptResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.EncryptResponse").msgclass
+        DecryptRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DecryptRequest").msgclass
+        DecryptRequestOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DecryptRequestOptions").msgclass
+        DecryptResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.DecryptResponse").msgclass
+        GetWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetWorkflowRequest").msgclass
+        GetWorkflowResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.GetWorkflowResponse").msgclass
+        StartWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.StartWorkflowRequest").msgclass
+        StartWorkflowResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.StartWorkflowResponse").msgclass
+        TerminateWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.TerminateWorkflowRequest").msgclass
+        PauseWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PauseWorkflowRequest").msgclass
+        ResumeWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.ResumeWorkflowRequest").msgclass
+        RaiseEventWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.RaiseEventWorkflowRequest").msgclass
+        PurgeWorkflowRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.runtime.v1.PurgeWorkflowRequest").msgclass
       end
     end
   end
