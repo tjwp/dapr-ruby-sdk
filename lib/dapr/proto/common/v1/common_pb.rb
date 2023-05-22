@@ -4,6 +4,7 @@
 require 'google/protobuf'
 
 require 'google/protobuf/any_pb'
+
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("dapr/proto/common/v1/common.proto", :syntax => :proto3) do
     add_message "dapr.proto.common.v1.HTTPExtension" do
@@ -20,6 +21,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       value :CONNECT, 6
       value :OPTIONS, 7
       value :TRACE, 8
+      value :PATCH, 9
     end
     add_message "dapr.proto.common.v1.InvokeRequest" do
       optional :method, :string, 1
@@ -30,6 +32,10 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "dapr.proto.common.v1.InvokeResponse" do
       optional :data, :message, 1, "google.protobuf.Any"
       optional :content_type, :string, 2
+    end
+    add_message "dapr.proto.common.v1.StreamPayload" do
+      optional :data, :bytes, 1
+      optional :seq, :uint64, 2
     end
     add_message "dapr.proto.common.v1.StateItem" do
       optional :key, :string, 1
@@ -55,6 +61,11 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       value :CONSISTENCY_EVENTUAL, 1
       value :CONSISTENCY_STRONG, 2
     end
+    add_message "dapr.proto.common.v1.ConfigurationItem" do
+      optional :value, :string, 1
+      optional :version, :string, 2
+      map :metadata, :string, :string, 3
+    end
   end
 end
 
@@ -66,11 +77,13 @@ module Dapr
         HTTPExtension::Verb = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.HTTPExtension.Verb").enummodule
         InvokeRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.InvokeRequest").msgclass
         InvokeResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.InvokeResponse").msgclass
+        StreamPayload = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StreamPayload").msgclass
         StateItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateItem").msgclass
         Etag = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.Etag").msgclass
         StateOptions = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions").msgclass
         StateOptions::StateConcurrency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConcurrency").enummodule
         StateOptions::StateConsistency = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.StateOptions.StateConsistency").enummodule
+        ConfigurationItem = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("dapr.proto.common.v1.ConfigurationItem").msgclass
       end
     end
   end
